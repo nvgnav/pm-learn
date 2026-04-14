@@ -53,10 +53,11 @@ export default function AuthCard() {
         });
 
         saveAuthData(data);
+        setSuccess(`Добро пожаловать, ${data.user.full_name}!`);
 
         setTimeout(() => {
           navigate("/home");
-        }, 300);
+        }, 500);
       }
     } catch (err) {
       let message = "Ошибка запроса. Проверьте данные и повторите.";
@@ -128,7 +129,7 @@ export default function AuthCard() {
                 <input
                   type="text"
                   name="group_name"
-                  placeholder="ИСТ-24-1б"
+                  placeholder="ИСТ-22-26"
                   value={form.group_name}
                   onChange={handleChange}
                   required
@@ -161,6 +162,12 @@ export default function AuthCard() {
               minLength={6}
             />
           </div>
+
+          {mode === "login" && (
+            <div className="admin-hint">
+              Администратор: admin@pmlearn.com / SUPER_ADMIN_123_!PMLEARN
+            </div>
+          )}
 
           {error && <div className="message error-message">{error}</div>}
           {success && <div className="message success-message">{success}</div>}
