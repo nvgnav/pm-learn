@@ -154,8 +154,6 @@ input {
   cursor: not-allowed;
 }
 
-/* HOME PAGE */
-
 .home-page {
   min-height: 100vh;
   background: linear-gradient(180deg, #dbe8f6 0%, #c7dcf1 100%);
@@ -315,6 +313,13 @@ input {
   border-radius: 22px;
   padding: 22px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.welcome-card:hover {
+  transform: translateY(-5px);
+  background: #dbe8f6;
 }
 
 .welcome-card h3 {
@@ -327,6 +332,15 @@ input {
   margin-bottom: 0;
   color: #416c9d;
   line-height: 1.5;
+}
+
+.admin-section {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.admin-section .welcome-card {
+  max-width: 340px;
 }
 
 .info-grid {
