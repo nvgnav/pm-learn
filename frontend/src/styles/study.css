@@ -1,6 +1,6 @@
 .study-layout {
   display: grid;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: 320px 1fr;
   gap: 24px;
   align-items: start;
 }
@@ -8,11 +8,15 @@
 .study-sidebar {
   position: sticky;
   top: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 .study-sidebar-card,
 .study-hero,
-.study-section-card {
+.study-section-card,
+.diagram-card {
   background: rgba(255, 255, 255, 0.82);
   border-radius: 22px;
   padding: 22px;
@@ -121,36 +125,26 @@
   line-height: 1.6;
 }
 
-.study-section-card h2 {
+.study-section-card h2,
+.diagram-card h3 {
   margin: 0 0 14px;
   font-size: 24px;
   color: #1f4f82;
 }
 
-.study-section-card p {
+.study-section-card p,
+.diagram-note {
   margin: 0 0 14px;
   font-size: 16px;
   color: #476d98;
   line-height: 1.6;
 }
 
-.theory-image-card {
-  width: 100%;
-  border-radius: 18px;
-  overflow: hidden;
-  background: #f7fbff;
-  border: 1px solid rgba(78, 130, 194, 0.12);
-}
-
-.theory-page-image {
-  width: 100%;
-  display: block;
-}
-
 .formula-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 14px;
+  margin: 16px 0;
 }
 
 .formula-card {
@@ -164,14 +158,11 @@
   line-height: 1.45;
 }
 
-.single-formula {
-  margin-bottom: 16px;
-}
-
 .calc-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin: 16px 0;
 }
 
 .calc-item {
@@ -184,14 +175,43 @@
   line-height: 1.5;
 }
 
-.result-box {
+.diagram-card {
   margin-top: 16px;
-  padding: 14px 16px;
-  border-radius: 16px;
-  background: #eaf3ff;
-  color: #1f4f82;
-  font-size: 17px;
+}
+
+.theory-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: #f7fbff;
+  border-radius: 18px;
+  border: 1px solid rgba(78, 130, 194, 0.12);
+}
+
+.svg-node-text {
+  font-size: 22px;
   font-weight: 700;
+  fill: #1d4f87;
+}
+
+.svg-label {
+  font-size: 22px;
+  font-weight: 700;
+  fill: #1d4f87;
+}
+
+.svg-small {
+  font-size: 16px;
+  font-weight: 600;
+  fill: #315f95;
+}
+
+.white-text {
+  fill: #ffffff;
+}
+
+.red-text {
+  fill: #c53d3d;
 }
 
 @media (max-width: 1100px) {
@@ -207,7 +227,8 @@
 @media (max-width: 700px) {
   .study-sidebar-card,
   .study-hero,
-  .study-section-card {
+  .study-section-card,
+  .diagram-card {
     padding: 18px;
     border-radius: 18px;
   }
@@ -216,14 +237,27 @@
     font-size: 24px;
   }
 
-  .study-section-card h2 {
+  .study-section-card h2,
+  .diagram-card h3 {
     font-size: 20px;
   }
 
   .study-section-card p,
   .formula-card,
   .calc-item,
-  .result-box {
+  .diagram-note {
     font-size: 15px;
+  }
+
+  .svg-node-text {
+    font-size: 18px;
+  }
+
+  .svg-label {
+    font-size: 18px;
+  }
+
+  .svg-small {
+    font-size: 13px;
   }
 }

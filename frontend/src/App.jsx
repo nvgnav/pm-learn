@@ -2,7 +2,9 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import AuthPage from "./pages/AuthPage";
 import HomePage from "./pages/HomePage";
 import TheoryPage from "./pages/TheoryPage";
+import TheoryTimePage from "./pages/TheoryTimePage";
 import PracticePage from "./pages/PracticePage";
+import ClassroomPage from "./pages/ClassroomPage";
 import ResultsPage from "./pages/ResultsPage";
 import ProfilePage from "./pages/ProfilePage";
 import StudentsPage from "./pages/StudentsPage";
@@ -57,10 +59,28 @@ export default function App() {
       />
 
       <Route
+        path="/theory/time-management"
+        element={
+          <PrivateRoute>
+            <TheoryTimePage />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
         path="/practice"
         element={
           <PrivateRoute>
             <PracticePage />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/classroom"
+        element={
+          <PrivateRoute>
+            <ClassroomPage />
           </PrivateRoute>
         }
       />
