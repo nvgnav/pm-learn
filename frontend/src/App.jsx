@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+
 import AuthPage from "./pages/AuthPage";
 import HomePage from "./pages/HomePage";
 import TheoryPage from "./pages/TheoryPage";
@@ -8,6 +9,7 @@ import ClassroomPage from "./pages/ClassroomPage";
 import ResultsPage from "./pages/ResultsPage";
 import ProfilePage from "./pages/ProfilePage";
 import StudentsPage from "./pages/StudentsPage";
+
 import { getToken, getCurrentUser } from "./api/auth";
 
 function PrivateRoute({ children }) {
@@ -38,6 +40,8 @@ function AdminRoute({ children }) {
 export default function App() {
   return (
     <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+
       <Route path="/login" element={<AuthPage />} />
 
       <Route
@@ -68,19 +72,19 @@ export default function App() {
       />
 
       <Route
-        path="/practice"
+        path="/classroom"
         element={
           <PrivateRoute>
-            <PracticePage />
+            <ClassroomPage />
           </PrivateRoute>
         }
       />
 
       <Route
-        path="/classroom"
+        path="/practice"
         element={
           <PrivateRoute>
-            <ClassroomPage />
+            <PracticePage />
           </PrivateRoute>
         }
       />
