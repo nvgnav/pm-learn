@@ -619,3 +619,99 @@ body {
     display: none;
   }
 }
+
+.tm-lecture-title.bold {
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.tm-lecture-title.italic {
+  font-style: italic;
+  padding-left: 20px;
+}
+
+.tm-red,
+.tm-red-text {
+  color: #e11818;
+  font-weight: 800;
+}
+
+.tm-scheme-card {
+  margin: 18px 0 26px;
+  padding: 18px;
+  border-radius: 22px;
+  background: #ffffff;
+  border: 1px solid #d7e8f8;
+  overflow-x: auto;
+}
+
+.tm-network-svg,
+.tm-graph-svg {
+  width: 100%;
+  min-width: 680px;
+  display: block;
+}
+
+.tm-edge {
+  stroke: #174f86;
+  stroke-width: 3;
+  fill: none;
+  marker-end: url(#arrow-blue);
+}
+
+.tm-edge-red {
+  stroke: #e11818;
+  stroke-width: 4;
+  fill: none;
+  marker-end: url(#arrow-red);
+}
+
+.tm-node {
+  fill: #ffffff;
+  stroke: #111111;
+  stroke-width: 2;
+}
+
+.tm-node-line {
+  stroke: #111111;
+  stroke-width: 1.5;
+}
+
+.tm-node-text {
+  fill: #174f86;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.tm-edge-label {
+  fill: #111111;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.tm-axis {
+  stroke: #111111;
+  stroke-width: 2;
+}
+
+.tm-graph-line {
+  stroke: #174f86;
+  stroke-width: 3;
+  fill: none;
+}
+
+.tm-red-fill {
+  fill: rgba(225, 24, 24, 0.82);
+}
+
+.tm-dash {
+  stroke: #111111;
+  stroke-width: 2;
+  stroke-dasharray: 8 6;
+}
+
+.tm-graph-label {
+  fill: #174f86;
+  font-size: 18px;
+  font-weight: 700;
+}
