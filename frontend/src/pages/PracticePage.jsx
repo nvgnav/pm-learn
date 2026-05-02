@@ -1,340 +1,556 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import PageLayout from "../components/PageLayout";
 import "../styles/study.css";
 
-const variants = [
-  {
-    id: 1,
-    title: "Вариант 1",
-    type: "узел–работа",
-    rows: [
-      { work: "A", next: ["B", "C"], prev: [], duration: 4 },
-      { work: "B", next: ["D"], prev: ["A"], duration: 8 },
-      { work: "C", next: ["E", "F", "G", "H"], prev: ["A"], duration: 6 },
-      { work: "D", next: ["F", "G", "H"], prev: ["B"], duration: 2 },
-      { work: "E", next: ["I"], prev: ["C"], duration: 4 },
-      { work: "F", next: ["I"], prev: ["C", "D"], duration: 8 },
-      { work: "G", next: ["K"], prev: ["C", "D"], duration: 6 },
-      { work: "H", next: ["J"], prev: ["C", "D"], duration: 3 },
-      { work: "I", next: ["K"], prev: ["E", "F"], duration: 4 },
-      { work: "J", next: ["K"], prev: ["H"], duration: 5 },
-      { work: "K", next: ["L", "M"], prev: ["G", "I", "J"], duration: 6 },
-      { work: "L", next: ["N"], prev: ["K"], duration: 8 },
-      { work: "M", next: [], prev: ["K"], duration: 3 },
-      { work: "N", next: ["O"], prev: ["L"], duration: 8 },
-      { work: "O", next: [], prev: ["N"], duration: 2 },
-    ],
-  },
-  {
-    id: 2,
-    title: "Вариант 2",
-    type: "узел–работа",
-    rows: [
-      { work: "A", next: ["D"], prev: [], duration: 10 },
-      { work: "B", next: ["C", "H"], prev: [], duration: 8 },
-      { work: "C", next: ["E", "F", "G"], prev: ["B"], duration: 12 },
-      { work: "D", next: ["K"], prev: ["A"], duration: 8 },
-      { work: "E", next: ["K"], prev: ["C"], duration: 7 },
-      { work: "F", next: ["J"], prev: ["C"], duration: 6 },
-      { work: "G", next: ["I", "L"], prev: ["C"], duration: 7 },
-      { work: "H", next: ["I", "L"], prev: ["B"], duration: 8 },
-      { work: "I", next: ["J"], prev: ["G", "H"], duration: 9 },
-      { work: "J", next: ["M", "N"], prev: ["F", "I"], duration: 4 },
-      { work: "K", next: ["M", "N"], prev: ["D", "E"], duration: 10 },
-      { work: "L", next: ["M", "N"], prev: ["G", "H"], duration: 11 },
-      { work: "M", next: [], prev: ["J", "K", "L"], duration: 10 },
-      { work: "N", next: ["O"], prev: ["J", "K", "L"], duration: 4 },
-      { work: "O", next: [], prev: ["N"], duration: 8 },
-    ],
-  },
-  {
-    id: 3,
-    title: "Вариант 3",
-    type: "узел–работа",
-    rows: [
-      { work: "A", next: ["C", "D"], prev: [], duration: 5 },
-      { work: "B", next: ["F"], prev: [], duration: 7 },
-      { work: "C", next: ["E"], prev: ["A"], duration: 9 },
-      { work: "D", next: ["H", "I"], prev: ["A"], duration: 7 },
-      { work: "E", next: ["G"], prev: ["C"], duration: 11 },
-      { work: "F", next: ["J"], prev: ["B"], duration: 3 },
-      { work: "G", next: ["K"], prev: ["E"], duration: 7 },
-      { work: "H", next: ["K"], prev: ["D"], duration: 13 },
-      { work: "I", next: ["L"], prev: ["D"], duration: 11 },
-      { work: "J", next: ["L"], prev: ["F"], duration: 9 },
-      { work: "K", next: ["O"], prev: ["G", "H"], duration: 7 },
-      { work: "L", next: ["O", "M"], prev: ["I", "J"], duration: 15 },
-      { work: "M", next: ["N"], prev: ["L"], duration: 13 },
-      { work: "N", next: ["P"], prev: ["M"], duration: 9 },
-      { work: "O", next: ["P"], prev: ["L", "K"], duration: 8 },
-      { work: "P", next: [], prev: ["N", "O"], duration: 7 },
-    ],
-  },
-  {
-    id: 4,
-    title: "Вариант 4",
-    type: "узел–работа",
-    rows: [
-      { work: "A", next: ["B", "C"], prev: [], duration: 3 },
-      { work: "B", next: ["E"], prev: ["A"], duration: 11 },
-      { work: "C", next: ["D", "F"], prev: ["A"], duration: 4 },
-      { work: "D", next: ["G", "I"], prev: ["C"], duration: 7 },
-      { work: "E", next: ["G", "I"], prev: ["B"], duration: 3 },
-      { work: "F", next: ["H", "L"], prev: ["C"], duration: 10 },
-      { work: "G", next: ["H", "L"], prev: ["D", "E"], duration: 3 },
-      { work: "H", next: ["K", "O"], prev: ["F", "G"], duration: 6 },
-      { work: "I", next: ["K", "O"], prev: ["D", "E"], duration: 4 },
-      { work: "J", next: ["K", "O"], prev: [], duration: 9 },
-      { work: "K", next: ["M"], prev: ["H", "I", "J"], duration: 5 },
-      { work: "L", next: ["M"], prev: ["F", "G"], duration: 9 },
-      { work: "M", next: ["N"], prev: ["K", "L"], duration: 4 },
-      { work: "N", next: [], prev: ["M"], duration: 7 },
-      { work: "O", next: [], prev: ["H", "I", "J"], duration: 8 },
-    ],
-  },
-  {
-    id: 5,
-    title: "Вариант 5",
-    type: "узел–работа",
-    rows: [
-      { work: "A", next: ["C", "D", "E"], prev: [], duration: 6 },
-      { work: "B", next: ["F"], prev: [], duration: 8 },
-      { work: "C", next: ["J"], prev: ["A"], duration: 10 },
-      { work: "D", next: ["G", "H", "I"], prev: ["A"], duration: 6 },
-      { work: "E", next: ["F"], prev: ["A"], duration: 8 },
-      { work: "F", next: ["G", "H", "I"], prev: ["B", "E"], duration: 10 },
-      { work: "G", next: ["J"], prev: ["D", "F"], duration: 6 },
-      { work: "H", next: ["K", "L"], prev: ["D", "F"], duration: 10 },
-      { work: "I", next: ["N"], prev: ["D", "F"], duration: 12 },
-      { work: "J", next: ["K", "L"], prev: ["C", "G"], duration: 8 },
-      { work: "K", next: ["M"], prev: ["H", "J"], duration: 6 },
-      { work: "L", next: ["N"], prev: ["H", "J"], duration: 14 },
-      { work: "M", next: ["O"], prev: ["K"], duration: 8 },
-      { work: "N", next: ["P"], prev: ["I", "L"], duration: 4 },
-      { work: "O", next: [], prev: ["M"], duration: 6 },
-      { work: "P", next: [], prev: ["N"], duration: 8 },
-    ],
-  },
-];
+import { practiceVariants } from "../data/practice";
+import NetworkGraph from "../components/practice/NetworkGraph";
+import { checkSolution } from "../utils/checkPracticeSolution";
+
+const variants = Object.values(practiceVariants);
+const STORAGE_KEY = "pm_practice_state";
 
 function pickRandomVariant() {
   return variants[Math.floor(Math.random() * variants.length)];
 }
 
-function calculateSchedule(rows) {
-  const map = new Map();
+function getVariantTypeTitle(type) {
+  if (type === "aoa") return "дуга–работа";
+  if (type === "aon") return "узел–работа";
+  return type;
+}
 
-  rows.forEach((row) => {
-    map.set(row.work, {
-      ...row,
-      ES: 0,
-      EF: 0,
-      LS: 0,
-      LF: 0,
-      reserve: 0,
-      critical: false,
-    });
-  });
-
-  const inDegree = new Map();
-
-  rows.forEach((row) => {
-    inDegree.set(row.work, row.prev.length);
-  });
-
-  const queue = rows
-    .filter((row) => row.prev.length === 0)
-    .map((row) => row.work);
-
-  const topo = [];
-
-  while (queue.length > 0) {
-    const current = queue.shift();
-    topo.push(current);
-
-    map.get(current).next.forEach((next) => {
-      inDegree.set(next, inDegree.get(next) - 1);
-
-      if (inDegree.get(next) === 0) {
-        queue.push(next);
-      }
-    });
+function createEmptyStudentData(variant) {
+  if (variant.type === "aon") {
+    return {
+      events: {},
+      works: variant.rows.map(() => ({
+        work: "",
+        duration: "",
+        ES: "",
+        EF: "",
+        LS: "",
+        LF: "",
+        reserve: "",
+        critical: "",
+      })),
+    };
   }
 
-  topo.forEach((id) => {
-    const node = map.get(id);
-
-    node.ES =
-      node.prev.length === 0
-        ? 0
-        : Math.max(...node.prev.map((prev) => map.get(prev).EF));
-
-    node.EF = node.ES + node.duration;
-  });
-
-  const projectDuration = Math.max(...topo.map((id) => map.get(id).EF));
-
-  [...topo].reverse().forEach((id) => {
-    const node = map.get(id);
-
-    node.LF =
-      node.next.length === 0
-        ? projectDuration
-        : Math.min(...node.next.map((next) => map.get(next).LS));
-
-    node.LS = node.LF - node.duration;
-    node.reserve = node.LS - node.ES;
-    node.critical = node.reserve === 0;
-  });
-
   return {
-    rows: rows.map((row) => map.get(row.work)),
-    projectDuration,
-    criticalPath: topo.filter((id) => map.get(id).critical),
+    events: {},
+    works: variant.works.map(() => ({
+      from: "",
+      to: "",
+      Dij: "",
+      ES: "",
+      EF: "",
+      LS: "",
+      LF: "",
+      TF: "",
+      SF: "",
+      FF: "",
+      IF: "",
+    })),
   };
 }
 
-function VariantTable({ rows }) {
-  return (
-    <div className="tm-table-scroll">
-      <table className="tm-table">
-        <thead>
-          <tr>
-            <th>Работа</th>
-            <th>Последователи</th>
-            <th>Предшественники</th>
-            <th>Длительность</th>
-            <th>ES</th>
-            <th>EF</th>
-            <th>LS</th>
-            <th>LF</th>
-            <th>Резерв</th>
-            <th>Критическая</th>
-          </tr>
-        </thead>
+function TaskBlock({ type }) {
+  if (type === "aon") {
+    return (
+      <section className="tm-section">
+        <h2>Задание</h2>
 
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.work}>
-              <td>{row.work}</td>
-              <td>{row.next.length ? row.next.join(", ") : "нет"}</td>
-              <td>{row.prev.length ? row.prev.join(", ") : "нет"}</td>
-              <td>{row.duration}</td>
-              <td>{row.ES}</td>
-              <td>{row.EF}</td>
-              <td>{row.LS}</td>
-              <td>{row.LF}</td>
-              <td>{row.reserve}</td>
-              <td>{row.critical ? "Да" : "Нет"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function PracticeTopicPage({ variant, onBack, onChangeVariant }) {
-  const calculation = useMemo(() => {
-    return calculateSchedule(variant.rows);
-  }, [variant]);
-
-  return (
-    <PageLayout title="Практические работы" activePage="practice">
-      <main className="tm-page">
-        <section className="tm-hero">
-          <button className="tm-top-back" onClick={onBack}>
-            ← К списку тем
-          </button>
-
-          <span className="tm-badge">Практическая работа</span>
-
-          <h1>Управление временем проекта</h1>
+        <div className="tm-text">
+          <p>Задан сетевой график в терминах «узел–работа».</p>
 
           <p>
-            Случайный вариант модели «узел–работа» из файла с вариантами.
-            Необходимо выполнить расчёт сетевой модели, определить ранние и
-            поздние сроки, резервы времени и критический путь.
-          </p>
-        </section>
-
-        <section className="tm-section">
-          <h2>Случайный вариант</h2>
-
-          <div className="tm-note">
-            <strong>{variant.title}</strong>
-            <br />
-            Тип модели: {variant.type}
-            <br />
-            Длительность проекта: {calculation.projectDuration}
-            <br />
-            Критический путь:{" "}
-            {calculation.criticalPath.length
-              ? calculation.criticalPath.join(" → ")
-              : "не определён"}
-          </div>
-
-          <button type="button" className="tm-download" onClick={onChangeVariant}>
-            Получить другой вариант
-          </button>
-        </section>
-
-        <section className="tm-section">
-          <h2>Задание</h2>
-
-          <p>
-            Для каждой работы необходимо определить ранние сроки начала и
-            окончания работы, поздние сроки начала и окончания работы, а также
-            резерв времени.
+            Для каждой работы необходимо определить все основные временные
+            характеристики:
           </p>
 
-          <div className="tm-formula-group">
-            <p className="tm-formula-line">
-              <span className="tm-formula">EF = ES + t</span>
-            </p>
-            <p className="tm-formula-line">
-              <span className="tm-formula">LS = LF − t</span>
-            </p>
-            <p className="tm-formula-line">
-              <span className="tm-formula">R = LS − ES = LF − EF</span>
-            </p>
-          </div>
-        </section>
+          <ul className="tm-list">
+            <li>
+              ранние сроки начала и окончания работы —{" "}
+              <span className="tm-formula">ES</span>,{" "}
+              <span className="tm-formula">EF</span>;
+            </li>
+            <li>
+              поздние сроки начала и окончания работы —{" "}
+              <span className="tm-formula">LS</span>,{" "}
+              <span className="tm-formula">LF</span>;
+            </li>
+            <li>
+              резерв времени работы —{" "}
+              <span className="tm-formula">R = LS − ES = LF − EF</span>;
+            </li>
+            <li>признак принадлежности работы к критическому пути.</li>
+          </ul>
 
-        <section className="tm-section">
-          <h2>Исходные данные варианта</h2>
-          <VariantTable rows={calculation.rows} />
-        </section>
-      </main>
-    </PageLayout>
+          <p>Результаты вычислений свести в таблицу.</p>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="tm-section">
+      <h2>Задание</h2>
+
+      <div className="tm-text">
+        <p>
+          Для каждого события, заданного своим ID, определить и отобразить на
+          сетевом графике:
+        </p>
+
+        <ol className="tm-list">
+          <li>
+            ранний срок начала <span className="tm-formula">ES</span>;
+          </li>
+          <li>
+            поздний срок окончания <span className="tm-formula">LF</span>;
+          </li>
+          <li>
+            резерв времени события <span className="tm-formula">T</span>.
+          </li>
+        </ol>
+
+        <p>
+          Для каждой работы определить все её возможные временные характеристики
+          и резервы времени:
+        </p>
+
+        <ul className="tm-list">
+          <li>
+            ранние сроки начала и окончания работы —{" "}
+            <span className="tm-formula">ES</span>,{" "}
+            <span className="tm-formula">EF</span>;
+          </li>
+          <li>
+            поздние сроки начала и окончания работы —{" "}
+            <span className="tm-formula">LS</span>,{" "}
+            <span className="tm-formula">LF</span>;
+          </li>
+          <li>
+            полный, гарантированный, свободный и независимый резервы времени —{" "}
+            <span className="tm-formula">TF</span>,{" "}
+            <span className="tm-formula">SF</span>,{" "}
+            <span className="tm-formula">FF</span>,{" "}
+            <span className="tm-formula">IF</span>.
+          </li>
+        </ul>
+
+        <p>Результаты вычислений свести в таблицу.</p>
+      </div>
+    </section>
   );
 }
 
 export default function PracticePage() {
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [variant, setVariant] = useState(null);
+  const [studentData, setStudentData] = useState({ events: {}, works: [] });
+  const [errors, setErrors] = useState(null);
+  const [notes, setNotes] = useState("");
+
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return;
+
+    try {
+      const parsed = JSON.parse(saved);
+
+      if (parsed.variantId && practiceVariants[parsed.variantId]) {
+        const savedVariant = practiceVariants[parsed.variantId];
+
+        setSelectedTopic("time-management");
+        setVariant(savedVariant);
+        setStudentData(
+          parsed.studentData || createEmptyStudentData(savedVariant)
+        );
+        setNotes(parsed.notes || "");
+      }
+    } catch {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!variant) return;
+
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        variantId: variant.id,
+        studentData,
+        notes,
+      })
+    );
+  }, [variant, studentData, notes]);
 
   function openTopic() {
+    const randomVariant = pickRandomVariant();
+
     setSelectedTopic("time-management");
-    setVariant(pickRandomVariant());
+    setVariant(randomVariant);
+    setStudentData(createEmptyStudentData(randomVariant));
+    setErrors(null);
+    setNotes("");
   }
 
   function backToTopics() {
+    localStorage.removeItem(STORAGE_KEY);
+
     setSelectedTopic(null);
     setVariant(null);
+    setStudentData({ events: {}, works: [] });
+    setErrors(null);
+    setNotes("");
   }
 
   function changeVariant() {
-    setVariant(pickRandomVariant());
+    const randomVariant = pickRandomVariant();
+
+    setVariant(randomVariant);
+    setStudentData(createEmptyStudentData(randomVariant));
+    setErrors(null);
+    setNotes("");
+  }
+
+  function handleCheck() {
+    setErrors(checkSolution(variant, studentData));
+  }
+
+  function updateEvent(id, field, value) {
+    const preparedValue = value === "" ? "" : Number(value);
+
+    setStudentData((prev) => {
+      const currentEvent = {
+        ...prev.events[id],
+        [field]: preparedValue,
+      };
+
+      if (currentEvent.ES !== "" && currentEvent.LF !== "") {
+        currentEvent.T = Number(currentEvent.LF) - Number(currentEvent.ES);
+      }
+
+      return {
+        ...prev,
+        events: {
+          ...prev.events,
+          [id]: currentEvent,
+        },
+      };
+    });
+  }
+
+  function updateWork(index, field, value) {
+    const preparedValue =
+      field === "from" ||
+      field === "to" ||
+      field === "work" ||
+      field === "critical" ||
+      value === ""
+        ? value
+        : Number(value);
+
+    setStudentData((prev) => {
+      const updatedWorks = [...prev.works];
+
+      updatedWorks[index] = {
+        ...updatedWorks[index],
+        [field]: preparedValue,
+      };
+
+      return {
+        ...prev,
+        works: updatedWorks,
+      };
+    });
   }
 
   if (selectedTopic === "time-management" && variant) {
     return (
-      <PracticeTopicPage
-        variant={variant}
-        onBack={backToTopics}
-        onChangeVariant={changeVariant}
-      />
+      <PageLayout title="Практические работы" activePage="practice">
+        <main className="tm-page">
+          <section className="tm-hero">
+            <button type="button" className="tm-top-back" onClick={backToTopics}>
+              ← К списку тем
+            </button>
+
+            <span className="tm-badge">Практическая работа</span>
+
+            <h1>Управление временем проекта</h1>
+
+            <p>Заполните таблицы и определите параметры сетевой модели.</p>
+          </section>
+
+          <section className="tm-section">
+            <h2>Случайный вариант</h2>
+
+            <p className="tm-text-block">
+              <strong>{variant.title}</strong>
+              <br />
+              Тип модели: {getVariantTypeTitle(variant.type)}
+            </p>
+
+            <button type="button" className="tm-download" onClick={changeVariant}>
+              Получить другой вариант
+            </button>
+          </section>
+
+          {variant.type === "aoa" && (
+            <section className="tm-section">
+              <h2>Сетевой график</h2>
+
+              <NetworkGraph
+                variant={variant}
+                studentData={studentData}
+                errors={errors}
+              />
+            </section>
+          )}
+
+          <TaskBlock type={variant.type} />
+
+          {variant.type === "aon" && (
+            <section className="tm-section">
+              <h2>Исходные данные варианта</h2>
+
+              <div className="tm-table-scroll">
+                <table className="tm-table tm-practice-table">
+                  <thead>
+                    <tr>
+                      <th>Работа</th>
+                      <th>Последователи</th>
+                      <th>Предшественники</th>
+                      <th>Длительность</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {variant.rows.map((row) => (
+                      <tr key={row.work}>
+                        <td>{row.work}</td>
+                        <td>{row.next.length ? row.next.join(", ") : "нет"}</td>
+                        <td>{row.prev.length ? row.prev.join(", ") : "нет"}</td>
+                        <td>{row.duration}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+
+          {variant.type === "aoa" && (
+            <section className="tm-section">
+              <h2>События</h2>
+
+              <div className="tm-table-scroll">
+                <table className="tm-table tm-practice-table tm-events-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>ES</th>
+                      <th>LF</th>
+                      <th>T</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {variant.events.map((event) => (
+                      <tr key={event.id}>
+                        <td>{event.id}</td>
+
+                        {["ES", "LF", "T"].map((field) => (
+                          <td key={field}>
+                            <input
+                              className={`tm-practice-input ${
+                                errors?.events?.[event.id]?.[field]
+                                  ? "input-error"
+                                  : ""
+                              }`}
+                              value={
+                                studentData.events[event.id]?.[field] ?? ""
+                              }
+                              onChange={(e) =>
+                                updateEvent(event.id, field, e.target.value)
+                              }
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+
+          {variant.type === "aoa" && (
+            <section className="tm-section">
+              <h2>Работы</h2>
+
+              <div className="tm-table-scroll">
+                <table className="tm-table tm-practice-table">
+                  <thead>
+                    <tr>
+                      <th>Работа</th>
+                      <th>Dij</th>
+                      <th>ES</th>
+                      <th>EF</th>
+                      <th>LS</th>
+                      <th>LF</th>
+                      <th>TF</th>
+                      <th>SF</th>
+                      <th>FF</th>
+                      <th>IF</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {studentData.works.map((work, index) => (
+                      <tr key={index}>
+                        <td>
+                          <div className="tm-path-cell">
+                            <input
+                              className={`tm-practice-input tm-path-input ${
+                                errors?.works?.[index]?.path
+                                  ? "input-error"
+                                  : ""
+                              }`}
+                              value={work.from}
+                              onChange={(e) =>
+                                updateWork(index, "from", e.target.value)
+                              }
+                            />
+
+                            <span className="tm-path-arrow">→</span>
+
+                            <input
+                              className={`tm-practice-input tm-path-input ${
+                                errors?.works?.[index]?.path
+                                  ? "input-error"
+                                  : ""
+                              }`}
+                              value={work.to}
+                              onChange={(e) =>
+                                updateWork(index, "to", e.target.value)
+                              }
+                            />
+                          </div>
+                        </td>
+
+                        {[
+                          "Dij",
+                          "ES",
+                          "EF",
+                          "LS",
+                          "LF",
+                          "TF",
+                          "SF",
+                          "FF",
+                          "IF",
+                        ].map((field) => (
+                          <td key={field}>
+                            <input
+                              className={`tm-practice-input ${
+                                errors?.works?.[index]?.[field]
+                                  ? "input-error"
+                                  : ""
+                              }`}
+                              value={work[field] ?? ""}
+                              onChange={(e) =>
+                                updateWork(index, field, e.target.value)
+                              }
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+
+          {variant.type === "aon" && (
+            <section className="tm-section">
+              <h2>Таблица решения</h2>
+
+              <div className="tm-table-scroll">
+                <table className="tm-table tm-practice-table">
+                  <thead>
+                    <tr>
+                      <th>Работа</th>
+                      <th>Длительность</th>
+                      <th>ES</th>
+                      <th>EF</th>
+                      <th>LS</th>
+                      <th>LF</th>
+                      <th>Резерв</th>
+                      <th>Критическая</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {studentData.works.map((work, index) => (
+                      <tr key={index}>
+                        {[
+                          "work",
+                          "duration",
+                          "ES",
+                          "EF",
+                          "LS",
+                          "LF",
+                          "reserve",
+                          "critical",
+                        ].map((field) => (
+                          <td key={field}>
+                            <input
+                              className={`tm-practice-input ${
+                                field === "work" ? "tm-path-input" : ""
+                              } ${
+                                errors?.works?.[index]?.[field]
+                                  ? "input-error"
+                                  : ""
+                              }`}
+                              value={work[field] ?? ""}
+                              placeholder={
+                                field === "critical" ? "Да/Нет" : ""
+                              }
+                              onChange={(e) =>
+                                updateWork(index, field, e.target.value)
+                              }
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+
+          <section className="tm-section">
+            <button type="button" className="tm-download" onClick={handleCheck}>
+              Проверить
+            </button>
+          </section>
+
+          <section className="tm-section">
+            <h2>Мои заметки</h2>
+
+            <textarea
+              className="tm-notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Пиши ход решения..."
+            />
+          </section>
+        </main>
+      </PageLayout>
     );
   }
 
@@ -346,10 +562,7 @@ export default function PracticePage() {
 
           <h1>Практические работы по дисциплине</h1>
 
-          <p>
-            Выберите тему, чтобы открыть практическую работу и получить
-            случайный вариант для решения.
-          </p>
+          <p>Выберите тему, чтобы открыть практическую работу.</p>
         </section>
 
         <section className="tm-section">
@@ -368,7 +581,7 @@ export default function PracticePage() {
                   Управление временем проекта
                 </span>
                 <span className="study-topic-description">
-                  Случайный вариант модели «узел–работа» из файла с вариантами.
+                  Расчет сетевого графика
                 </span>
               </span>
             </button>
