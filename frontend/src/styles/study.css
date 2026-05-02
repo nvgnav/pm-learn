@@ -921,3 +921,55 @@ body {
   font-size: 17px;
   line-height: 1.65;
 }
+
+.practice-results-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.practice-result-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid #d8e6f5;
+  background: #ffffff;
+}
+
+.practice-result-card h3 {
+  margin: 0 0 6px;
+  color: #154d83;
+  font-size: 18px;
+}
+
+.practice-result-card p {
+  margin: 0;
+  color: #315f95;
+  line-height: 1.5;
+}
+
+.practice-result-card-error {
+  border-color: #e11818;
+  background: #fff5f5;
+}
+
+.practice-result-count {
+  min-width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef6ff;
+  color: #154d83;
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.practice-result-card-error .practice-result-count {
+  background: #ffe4e4;
+  color: #e11818;
+}

@@ -12,6 +12,10 @@ import StudentsPage from "./pages/StudentsPage";
 
 import { getToken, getCurrentUser } from "./api/auth";
 
+/* ===================== */
+/* PROTECTED ROUTES */
+/* ===================== */
+
 function PrivateRoute({ children }) {
   const token = getToken();
 
@@ -37,13 +41,20 @@ function AdminRoute({ children }) {
   return children;
 }
 
+/* ===================== */
+/* APP */
+/* ===================== */
+
 export default function App() {
   return (
     <Routes>
+      {/* redirect */}
       <Route path="/" element={<Navigate to="/login" replace />} />
 
+      {/* auth */}
       <Route path="/login" element={<AuthPage />} />
 
+      {/* main */}
       <Route
         path="/home"
         element={
@@ -53,6 +64,7 @@ export default function App() {
         }
       />
 
+      {/* theory */}
       <Route
         path="/theory"
         element={
@@ -71,6 +83,7 @@ export default function App() {
         }
       />
 
+      {/* classroom */}
       <Route
         path="/classroom"
         element={
@@ -80,6 +93,7 @@ export default function App() {
         }
       />
 
+      {/* practice */}
       <Route
         path="/practice"
         element={
@@ -89,6 +103,7 @@ export default function App() {
         }
       />
 
+      {/* 🔥 RESULTS (уже подключено правильно) */}
       <Route
         path="/results"
         element={
@@ -98,6 +113,7 @@ export default function App() {
         }
       />
 
+      {/* profile */}
       <Route
         path="/profile"
         element={
@@ -107,6 +123,7 @@ export default function App() {
         }
       />
 
+      {/* admin */}
       <Route
         path="/students"
         element={
@@ -116,6 +133,7 @@ export default function App() {
         }
       />
 
+      {/* fallback */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );

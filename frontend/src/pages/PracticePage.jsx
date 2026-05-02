@@ -5,6 +5,8 @@ import "../styles/study.css";
 import { practiceVariants } from "../data/practice";
 import NetworkGraph from "../components/practice/NetworkGraph";
 import { checkSolution } from "../utils/checkPracticeSolution";
+import ResultsPage from "./ResultsPage";
+import { savePracticeResult } from "../api/practiceResults";
 
 const variants = Object.values(practiceVariants);
 const STORAGE_KEY = "pm_practice_state";
@@ -54,6 +56,18 @@ function createEmptyStudentData(variant) {
   };
 }
 
+function countErrors(result) {
+  const eventErrors = Object.values(result.events || {}).reduce((sum, item) => {
+    return sum + Object.values(item || {}).filter(Boolean).length;
+  }, 0);
+
+  const workErrors = Object.values(result.works || {}).reduce((sum, item) => {
+    return sum + Object.values(item || {}).filter(Boolean).length;
+  }, 0);
+
+  return eventErrors + workErrors;
+}
+
 function TaskBlock({ type }) {
   if (type === "aon") {
     return (
@@ -74,16 +88,19 @@ function TaskBlock({ type }) {
               <span className="tm-formula">ES</span>,{" "}
               <span className="tm-formula">EF</span>;
             </li>
+
             <li>
               поздние сроки начала и окончания работы —{" "}
               <span className="tm-formula">LS</span>,{" "}
               <span className="tm-formula">LF</span>;
             </li>
+
             <li>
               резерв времени работы —{" "}
               <span className="tm-formula">R = LS − ES = LF − EF</span>;
             </li>
-            <li>признак принадлежности работы к критическому пути.</li>
+
+            <li>определить, является ли работа критической.</li>
           </ul>
 
           <p>Результаты вычислений свести в таблицу.</p>
@@ -106,9 +123,11 @@ function TaskBlock({ type }) {
           <li>
             ранний срок начала <span className="tm-formula">ES</span>;
           </li>
+
           <li>
             поздний срок окончания <span className="tm-formula">LF</span>;
           </li>
+
           <li>
             резерв времени события <span className="tm-formula">T</span>.
           </li>
@@ -125,11 +144,13 @@ function TaskBlock({ type }) {
             <span className="tm-formula">ES</span>,{" "}
             <span className="tm-formula">EF</span>;
           </li>
+
           <li>
             поздние сроки начала и окончания работы —{" "}
             <span className="tm-formula">LS</span>,{" "}
             <span className="tm-formula">LF</span>;
           </li>
+
           <li>
             полный, гарантированный, свободный и независимый резервы времени —{" "}
             <span className="tm-formula">TF</span>,{" "}
@@ -151,6 +172,8 @@ export default function PracticePage() {
   const [studentData, setStudentData] = useState({ events: {}, works: [] });
   const [errors, setErrors] = useState(null);
   const [notes, setNotes] = useState("");
+  const [showResults, setShowResults] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -164,10 +187,10 @@ export default function PracticePage() {
 
         setSelectedTopic("time-management");
         setVariant(savedVariant);
-        setStudentData(
-          parsed.studentData || createEmptyStudentData(savedVariant)
-        );
+        setStudentData(parsed.studentData || createEmptyStudentData(savedVariant));
+        setErrors(parsed.errors || null);
         setNotes(parsed.notes || "");
+        setShowResults(parsed.showResults || false);
       }
     } catch {
       localStorage.removeItem(STORAGE_KEY);
@@ -177,15 +200,22 @@ export default function PracticePage() {
   useEffect(() => {
     if (!variant) return;
 
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const parsed = saved ? JSON.parse(saved) : {};
+
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({
+        ...parsed,
         variantId: variant.id,
         studentData,
+        errors,
         notes,
+        showResults,
+        attempts: parsed.attempts || [],
       })
     );
-  }, [variant, studentData, notes]);
+  }, [variant, studentData, errors, notes, showResults]);
 
   function openTopic() {
     const randomVariant = pickRandomVariant();
@@ -195,6 +225,8 @@ export default function PracticePage() {
     setStudentData(createEmptyStudentData(randomVariant));
     setErrors(null);
     setNotes("");
+    setShowResults(false);
+    setSaveError("");
   }
 
   function backToTopics() {
@@ -205,6 +237,8 @@ export default function PracticePage() {
     setStudentData({ events: {}, works: [] });
     setErrors(null);
     setNotes("");
+    setShowResults(false);
+    setSaveError("");
   }
 
   function changeVariant() {
@@ -214,10 +248,57 @@ export default function PracticePage() {
     setStudentData(createEmptyStudentData(randomVariant));
     setErrors(null);
     setNotes("");
+    setShowResults(false);
+    setSaveError("");
   }
 
-  function handleCheck() {
-    setErrors(checkSolution(variant, studentData));
+  async function handleCheck() {
+    const result = checkSolution(variant, studentData);
+    const totalErrors = countErrors(result);
+
+    setErrors(result);
+    setSaveError("");
+
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const parsed = saved ? JSON.parse(saved) : {};
+
+    const attempt = {
+      id: Date.now(),
+      date: new Date().toLocaleString("ru-RU"),
+      variant,
+      errors: result,
+      studentData,
+      totalErrors,
+    };
+
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        ...parsed,
+        variantId: variant.id,
+        studentData,
+        errors: result,
+        notes,
+        showResults: true,
+        attempts: [...(parsed.attempts || []), attempt],
+      })
+    );
+
+    try {
+      await savePracticeResult({
+        variant_id: variant.id,
+        variant_title: variant.title,
+        variant_type: variant.type,
+        student_data: studentData,
+        errors: result,
+        total_errors: totalErrors,
+      });
+    } catch (error) {
+      console.error(error);
+      setSaveError("Результат сохранён локально, но не записан в базу данных.");
+    }
+
+    setShowResults(true);
   }
 
   function updateEvent(id, field, value) {
@@ -229,7 +310,12 @@ export default function PracticePage() {
         [field]: preparedValue,
       };
 
-      if (currentEvent.ES !== "" && currentEvent.LF !== "") {
+      if (
+        currentEvent.ES !== undefined &&
+        currentEvent.ES !== "" &&
+        currentEvent.LF !== undefined &&
+        currentEvent.LF !== ""
+      ) {
         currentEvent.T = Number(currentEvent.LF) - Number(currentEvent.ES);
       }
 
@@ -266,6 +352,16 @@ export default function PracticePage() {
         works: updatedWorks,
       };
     });
+  }
+
+  if (showResults && variant && errors) {
+    return (
+      <ResultsPage
+        variant={variant}
+        errors={errors}
+        onBack={() => setShowResults(false)}
+      />
+    );
   }
 
   if (selectedTopic === "time-management" && variant) {
@@ -370,9 +466,7 @@ export default function PracticePage() {
                                   ? "input-error"
                                   : ""
                               }`}
-                              value={
-                                studentData.events[event.id]?.[field] ?? ""
-                              }
+                              value={studentData.events[event.id]?.[field] ?? ""}
                               onChange={(e) =>
                                 updateEvent(event.id, field, e.target.value)
                               }
@@ -516,9 +610,7 @@ export default function PracticePage() {
                                   : ""
                               }`}
                               value={work[field] ?? ""}
-                              placeholder={
-                                field === "critical" ? "Да/Нет" : ""
-                              }
+                              placeholder={field === "critical" ? "Да/Нет" : ""}
                               onChange={(e) =>
                                 updateWork(index, field, e.target.value)
                               }
@@ -537,6 +629,8 @@ export default function PracticePage() {
             <button type="button" className="tm-download" onClick={handleCheck}>
               Проверить
             </button>
+
+            {saveError && <p className="tm-error-text">{saveError}</p>}
           </section>
 
           <section className="tm-section">
@@ -580,6 +674,7 @@ export default function PracticePage() {
                 <span className="study-topic-title">
                   Управление временем проекта
                 </span>
+
                 <span className="study-topic-description">
                   Расчет сетевого графика
                 </span>
